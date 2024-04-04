@@ -1,5 +1,5 @@
 ---
-- name: Set up SSSD for Linux host
+- name: Set up SSSD for Linux host.
   hosts: Joiners
   gather_facts: true
   become: true
