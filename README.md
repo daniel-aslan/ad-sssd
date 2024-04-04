@@ -1,4 +1,4 @@
-# SSO configuration 
+# SSO configuration. 
 
 # Description
 This role is used to setup SSO.
