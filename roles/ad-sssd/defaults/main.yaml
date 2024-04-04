@@ -1,0 +1,30 @@
+---
+defaults_fqn: true
+defaults_fallback_home: true
+defaults_psoft_domain: true
+defaults_shell: "/bin/bash"
+sssd_conf: "/etc/sssd/sssd.conf"
+sssd_conf_owner: 
+defaults_ad_domain: 
+defaults_ad_admin: 
+defaults_ad_password: SomeLongPassword123!
+defaults_ad_sssd_depends:
+  - "samba-common-tools"
+  - "realmd"
+  - "oddjob"
+  - "oddjob-mkhomedir"
+  - "sssd"
+  - "adcli"
+  - "krb5-workstation"
+defaults_users:
+  - ""
+  - ""
+defaults_psusers:
+  - ""
+  - ""
+defaults_groups:
+  - ''
+  - ''
+defaults_psgroups:
+  - ''
+  - ''

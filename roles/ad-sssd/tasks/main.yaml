@@ -1,0 +1,55 @@
+---
+- name: Enable RC4 support
+  ansible.builtin.command:
+    cmd: "update-crypto-policies --set DEFAULT:AD-SUPPORT"
+# Additional notes may require additonal tasks
+# ii. /etc/crypto-policies/back-ends/krb5.config
+#
+# [libdefaults]
+#
+# permitted_enctypes = aes256-cts-hmac-sha1-96 aes256-cts-hmac-sha384-192 camellia256-cts-cmac aes128-cts-hmac-sha1-96 aes128-cts-hmac-sha256-128 camellia128-cts-cmac +rc4
+#
+# NOTE: The AD-SUPPORT cryptographic subpolicy is only available on RHEL 8.3 and newer.
+# To enable support for RC4 in RHEL 8.0 and RHEL 8.1, add +rc4 to the permitted_enctypes option in
+# the /etc/crypto-policies/back-ends/krb5.config file:
+
+- name: Install dependencies from Yum
+  ansible.builtin.yum:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  loop: "{{ defaults_ad_sssd_depends }}"
+
+- name: Copy the SSSD config template over.
+  ansible.builtin.template:
+    src: templates/sssd.conf.j2
+    dest: "{{ sssd_conf }}"
+    owner: "{{ sssd_conf_owner }}"
+    group: "{{ sssd_conf_owner }}"
+    mode: "0600"
+
+- name: Join the domain
+  ansible.builtin.command: 'realm join {{ defaults_ad_domain }} -U "{{ defaults_ad_admin }}" --computer-ou="OU=Testing,OU=UTS,OU=XXX Servers,DC=xx,DC=yyy,DC=xxx"'
+  register: join_result
+  ignore_errors: true
+
+- name: Check the join result
+  ansible.builtin.fail:
+    msg: "Unable to join the domain, {{ join_result.stderr }}"
+  when: join_result.rc != 0
+
+- name: Restart SSSD service
+  ansible.builtin.service:
+    name: sssd
+    state: restarted
+    enabled: true
+
+- name: Validate the join
+  ansible.builtin.command: getent passwd {{ defaults_ad_admin }}
+  register: validate_result
+  ignore_errors: true
+
+- name: Check the validation result
+  ansible.builtin.fail:
+    msg: "Join validation failed, {{ validate_result.stderr }}"
+  when: validate_result.rc != 0

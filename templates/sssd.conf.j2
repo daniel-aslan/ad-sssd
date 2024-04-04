@@ -1,0 +1,68 @@
+############################### Managed by AWX {{ ansible_date_time.date }} ######################
+config_file_version = 2
+
+services = nss, pam
+
+domains = {{ defaults_ad_domain }}
+
+#debug_level = 9
+
+[nss]
+
+[pam]
+
+#debug_level = 9
+
+[domain/{{ defaults_ad_domain }}]
+
+ad_domain = {{ defaults_ad_domain }}
+
+krb5_realm = {{ defaults_ad_domain | upper }}
+
+realmd_tags = manages-system joined-with-adcli
+
+cache_credentials = True
+
+id_provider = ad
+
+krb5_store_password_if_offline = True
+
+default_shell = {{ defaults_shell}}
+
+ldap_id_mapping = True
+
+# Change
+{% if defaults_fqn == true %}
+use_fully_qualified_names = True
+{% else %}
+use_fully_qualified_names = False
+{% endif %}
+
+override_homedir = /home/%u
+
+{% if defaults_fallback_home == true %}
+fallback_homedir = /home/%u
+{% else %}
+fallback_homedir = /home/%u@%d
+{% endif %}
+
+#Used to set the username without the domain
+full_name_format = %1$s
+
+# This is used to improve group member lookup speed
+ignore_group_members = true
+
+access_provider = simple
+
+chpass_provider = none
+
+simple_allow_users = {{ defaults_users|join(' ') }} {{ defaults_xxusers|join(' ') }} 
+simple_allow_groups = {{ defaults_groups|join(' ') }} {{ defaults_groups|join(' ') }} 
+
+{% if defaults_xxxxx_domain == true %}
+[domain/{{ defaults_ad_domain }}xxxxxxxx.{{ defaults_ad_domain }}]
+
+use_fully_qualified_names = False
+
+chpass_provider = none
+{% endif %}
